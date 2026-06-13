@@ -1,4 +1,4 @@
-const CACHE = "banana-v2";
+const CACHE = "banana-v3";
 const ASSETS = [
   "./",
   "index.html",
