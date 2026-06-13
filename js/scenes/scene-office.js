@@ -3,159 +3,136 @@
 class SceneOffice extends Phaser.Scene {
   constructor() { super({ key: "SceneOffice" }); }
 
+  preload() {
+    this.load.spritesheet("indoor", "sprites/indoor_tiles.png", {
+      frameWidth: 16, frameHeight: 16, spacing: 1,
+    });
+    this.load.spritesheet("chars", "sprites/char_tiles.png", {
+      frameWidth: 16, frameHeight: 16, spacing: 1,
+    });
+    this.load.image("indoor_sample", "sprites/indoor_sample.png");
+  }
+
   create() {
     const W = this.cameras.main.width;
     const H = this.cameras.main.height;
+    const TILE = 16;
+    const SCALE = 3;
+    const T = TILE * SCALE;
 
     this.cameras.main.setBackgroundColor(0x1a1410);
 
+    const bg = this.add.image(W / 2, H / 2 + 18, "indoor_sample");
+    const sampleW = 918;
+    const sampleH = 516;
+    const scale = Math.min((W - 280) / sampleW, (H - 70) / sampleH);
+    bg.setScale(scale);
+    bg.setAlpha(0.95);
+    bg.x = (W - 280) / 2 + 6;
+    bg.y = (H - 36) / 2 + 36;
+
+    const overlay = this.add.graphics();
+    overlay.fillStyle(0x0a0608, 0.35).fillRect(0, 36, W - 280, H - 36);
+
     const tbar = this.add.graphics();
     tbar.fillStyle(0x2a2218).fillRect(0, 0, W, 36);
-    tbar.fillStyle(PALETTE.brass).fillRect(0, 36, W, 1);
-
-    this.clock = this.add.text(12, 6,
-      this.now(), {
-        fontFamily: "VT323, monospace", fontSize: "20px", color: "#d4b870",
-      });
-    this.add.text(120, 6, "OSLO 10:42 · NYSE 04:42 · TOKYO 17:42", {
-      fontFamily: "VT323, monospace", fontSize: "16px", color: "#7a5a3a",
+    tbar.fillStyle(0xd4b870).fillRect(0, 36, W, 1);
+    this.add.text(12, 6, "BANANA HOLDINGS · ETASJE 23", {
+      fontFamily: "VT323, monospace", fontSize: "18px", color: "#d4b870",
     });
-    this.add.text(W - 12, 6, "[?]  [SETTINGS]  [BORTSE]", {
-      fontFamily: "VT323, monospace", fontSize: "16px", color: "#d4b870",
+    this.clock = this.add.text(W - 12, 6, this.now(), {
+      fontFamily: "VT323, monospace", fontSize: "18px", color: "#d4b870",
     }).setOrigin(1, 0);
-
     this.time.addEvent({
-      delay: 1000, loop: true,
-      callback: () => this.clock.setText(this.now()),
+      delay: 1000, loop: true, callback: () => this.clock.setText(this.now()),
     });
 
-    const floorG = this.add.graphics();
-    floorG.fillStyle(0x8a5a30).fillRect(20, 50, W * 0.72, H - 70);
-    for (let i = 0; i < 20; i++) {
-      floorG.lineStyle(1, 0x6a4520).strokeLineShape(
-        new Phaser.Geom.Line(20, 50 + i * 24, 20 + W * 0.72, 50 + i * 24)
-      );
-    }
-
-    floorG.fillStyle(PALETTE.night).fillRect(20, 50, W * 0.72, 30);
-    for (let i = 0; i < 60; i++) {
-      floorG.fillStyle(0xffdc80).fillRect(
-        20 + Phaser.Math.Between(0, W * 0.72), 50 + Phaser.Math.Between(0, 26), 2, 2
-      );
-    }
-
-    floorG.fillStyle(PALETTE.cream).fillRect(20, 84, W * 0.72, 6);
-    floorG.fillStyle(PALETTE.cream).fillRect(20, 84, 6, H - 110);
-    floorG.fillStyle(PALETTE.cream).fillRect(W * 0.72 + 14, 84, 6, H - 110);
-    floorG.fillStyle(PALETTE.cream).fillRect(20, H - 26, W * 0.72, 6);
-
-    const wallRoomY = 100;
-    const wallRoomH = 110;
-    const officeW = (W * 0.72 - 32) / 7;
-    const officeNames = ["WOLF", "KNUT", "HALVOR", "SIGURD", "MAGNE", "STEIN", "SATOSHI"];
-
-    for (let i = 0; i < 7; i++) {
-      const ox = 26 + i * officeW;
-      floorG.fillStyle(PALETTE.cream).fillRect(ox, wallRoomY, officeW - 2, wallRoomH);
-      floorG.fillStyle(PALETTE.mahogany).fillRect(ox, wallRoomY, officeW - 2, 4);
-      floorG.fillStyle(PALETTE.mahoganyDark).fillRect(ox + officeW - 10, wallRoomY + wallRoomH - 24, 8, 20);
-      floorG.fillStyle(PALETTE.brass).fillRect(ox + officeW - 5, wallRoomY + wallRoomH - 14, 2, 2);
-      this.add.text(ox + officeW / 2 - 1, wallRoomY + 12, officeNames[i], {
-        fontFamily: "VT323, monospace", fontSize: "13px", color: "#7a1a1a",
+    const labels = [
+      { x: 0.13, y: 0.32, name: "Reidar", role: "janitor" },
+      { x: 0.32, y: 0.42, name: "Espen", role: "trader" },
+      { x: 0.58, y: 0.38, name: "Knut", role: "risk" },
+      { x: 0.74, y: 0.52, name: "Gunnar", role: "Equinor" },
+      { x: 0.45, y: 0.68, name: "Diamond", role: "WSB" },
+      { x: 0.18, y: 0.62, name: "Bjarne", role: "research" },
+    ];
+    labels.forEach((l, i) => {
+      const x = l.x * (W - 280) + 6;
+      const y = l.y * (H - 36) + 36;
+      const tag = this.add.container(x, y);
+      const bgT = this.add.graphics();
+      bgT.fillStyle(0x1a1410, 0.92).fillRoundedRect(-44, -8, 88, 16, 2);
+      bgT.lineStyle(1, 0xd4b870).strokeRoundedRect(-44, -8, 88, 16, 2);
+      tag.add(bgT);
+      const t = this.add.text(0, -1, l.name + " · " + l.role, {
+        fontFamily: "VT323, monospace", fontSize: "11px", color: "#d4b870",
       }).setOrigin(0.5);
-    }
+      tag.add(t);
+      tag.setAlpha(0);
+      this.tweens.add({
+        targets: tag, alpha: 1, duration: 300, delay: 600 + i * 120,
+      });
+    });
 
-    const mtY = wallRoomY + wallRoomH + 14;
-    const mtH = 100;
-    const mtW = W * 0.32;
-    const mtX = (W * 0.72 - mtW) / 2 + 20;
-    floorG.fillStyle(PALETTE.cream).fillRect(mtX, mtY, mtW, mtH);
-    floorG.lineStyle(3, PALETTE.brass).strokeRect(mtX, mtY, mtW, mtH);
-    this.add.text(mtX + mtW / 2, mtY + 16, "MØTEROMMET", {
-      fontFamily: "VT323, monospace", fontSize: "16px", color: "#7a1a1a",
-    }).setOrigin(0.5);
-    floorG.fillStyle(PALETTE.mahoganyMid).fillEllipse(mtX + mtW / 2, mtY + mtH / 2 + 16, mtW * 0.6, 32);
-    floorG.fillStyle(0x7a4a2a).fillEllipse(mtX + mtW / 2, mtY + mtH / 2 + 12, mtW * 0.58, 28);
-    floorG.fillStyle(0xfafaf0).fillRect(mtX + 30, mtY + mtH - 18, mtW - 60, 12);
-    this.add.text(mtX + mtW / 2, mtY + mtH - 12, "OSEAX FULLY VALUED · INNSIDEKJØP = NEI", {
-      fontFamily: "VT323, monospace", fontSize: "9px", color: "#1a1a1a",
-    }).setOrigin(0.5);
-
-    const tfY = mtY + mtH + 10;
-    const tfH = H - tfY - 50;
-    floorG.fillStyle(0x6a4520).fillRect(30, tfY, W * 0.72 - 20, tfH);
-    floorG.fillStyle(0x5a3520).fillRect(30, tfY, W * 0.72 - 20, 4);
-
-    const tfNames = ["BJARNE", "ESPEN", "BÅRD", "PER", "GUNNAR", "OLA", "TRYGVE", "DIAMOND"];
-    const tfDeskW = (W * 0.72 - 60) / 8;
-    for (let i = 0; i < 8; i++) {
-      const dx = 38 + i * tfDeskW;
-      floorG.fillStyle(PALETTE.mahogany).fillRect(dx, tfY + 14, tfDeskW - 4, 36);
-      floorG.fillStyle(0x1a1a1a).fillRect(dx + 6, tfY + 18, tfDeskW - 16, 14);
-      floorG.fillStyle(0x1a3a4a).fillRect(dx + 8, tfY + 20, tfDeskW - 20, 10);
-      this.add.text(dx + (tfDeskW - 4) / 2, tfY + 60, tfNames[i], {
-        fontFamily: "VT323, monospace", fontSize: "10px", color: "#d4b870",
-      }).setOrigin(0.5);
-    }
-
-    const sideX = W * 0.72 + 30;
-    const sideW = W - sideX - 14;
+    const sideX = W - 280 + 8;
+    const sideW = 268;
     const sideG = this.add.graphics();
-    sideG.fillStyle(0x2a2218).fillRect(sideX, 50, sideW, H - 70);
-    sideG.lineStyle(1, PALETTE.brass).strokeRect(sideX, 50, sideW, H - 70);
+    sideG.fillStyle(0x1a1410).fillRect(sideX, 36, sideW, H - 36);
+    sideG.lineStyle(1, 0xd4b870).strokeRect(sideX, 36, sideW, H - 36);
 
-    this.add.text(sideX + sideW / 2, 70, "DAGENS PnL", {
+    this.add.text(sideX + 12, 50, "DAGENS SCOOP-FEED", {
       fontFamily: "VT323, monospace", fontSize: "16px", color: "#d4b870",
+    });
+
+    const feed = [
+      { t: "10:42", who: "Gunnar", msg: "Brent +1,1 %, EQNR følger", color: "#3a9a3a" },
+      { t: "10:36", who: "Diamond", msg: "GME +3 %, må kjøpe mer 🚀", color: "#ff8a40" },
+      { t: "10:21", who: "Knut", msg: "VaR for høy, Espen blokkeres", color: "#ff6a6a" },
+      { t: "09:58", who: "Bjarne", msg: "YAR Q2 i morgen — sjekk forventninger", color: "#d4b870" },
+      { t: "09:42", who: "Satoshi", msg: "BTC tester 65k motstand", color: "#aa6aff" },
+      { t: "09:15", who: "Wolf", msg: "MORGENMØTE NÅ", color: "#fafaf0" },
+    ];
+    feed.forEach((row, i) => {
+      const y = 78 + i * 56;
+      this.add.text(sideX + 12, y, row.t, {
+        fontFamily: "VT323, monospace", fontSize: "12px", color: "#7a5a3a",
+      });
+      this.add.text(sideX + 56, y, row.who, {
+        fontFamily: "VT323, monospace", fontSize: "13px", color: row.color,
+      });
+      this.add.text(sideX + 12, y + 18, row.msg, {
+        fontFamily: "VT323, monospace", fontSize: "13px",
+        color: "#fafaf0", wordWrap: { width: sideW - 24 },
+      });
+    });
+
+    const pnlY = H - 100;
+    const pnlG = this.add.graphics();
+    pnlG.fillStyle(0x2a2218).fillRect(sideX + 8, pnlY, sideW - 16, 80);
+    pnlG.lineStyle(1, 0x3a9a3a).strokeRect(sideX + 8, pnlY, sideW - 16, 80);
+    this.add.text(sideX + sideW / 2, pnlY + 12, "DAGENS PnL", {
+      fontFamily: "VT323, monospace", fontSize: "14px", color: "#d4b870",
     }).setOrigin(0.5);
-    this.add.text(sideX + sideW / 2, 100, "+ 1 247 kr", {
+    this.add.text(sideX + sideW / 2, pnlY + 38, "+ 1 247 kr", {
       fontFamily: "VT323, monospace", fontSize: "28px", color: "#3a9a3a",
     }).setOrigin(0.5);
-    this.add.text(sideX + sideW / 2, 130, "+0,8 % på dagen", {
-      fontFamily: "VT323, monospace", fontSize: "13px", color: "#7a5a3a",
+    this.add.text(sideX + sideW / 2, pnlY + 62, "+0,8 % · uke +3,4 %", {
+      fontFamily: "VT323, monospace", fontSize: "12px", color: "#7a5a3a",
     }).setOrigin(0.5);
 
-    this.add.text(sideX + 10, 170, "SISTE SCOOP:", {
-      fontFamily: "VT323, monospace", fontSize: "14px", color: "#d4b870",
-    });
-    this.add.text(sideX + 10, 190, "Gunnar · Brent +1,1 %", {
-      fontFamily: "VT323, monospace", fontSize: "13px", color: "#fafaf0",
-    });
-    this.add.text(sideX + 10, 210, "→ MØTE OM 12 MIN", {
-      fontFamily: "VT323, monospace", fontSize: "12px", color: "#7a5a3a",
-    });
-
-    this.add.text(sideX + 10, 250, "AKTIVE APER:", {
-      fontFamily: "VT323, monospace", fontSize: "14px", color: "#d4b870",
-    });
-    const live = [
-      ["Espen", "trader", "#3a9a3a"],
-      ["Bjarne", "researcher", "#d4b870"],
-      ["Gunnar", "Equinor", "#ff8a40"],
-      ["Diamond", "WSB", "#ff6a6a"],
-    ];
-    live.forEach((row, i) => {
-      this.add.text(sideX + 14, 272 + i * 18, "● " + row[0] + " — " + row[1], {
-        fontFamily: "VT323, monospace", fontSize: "13px", color: row[2],
-      });
-    });
-
-    this.add.text(sideX + 10, H - 70, "Klikk en pult for drilldown", {
-      fontFamily: "VT323, monospace", fontSize: "11px", color: "#5a4a3a",
-    });
-
-    const intro = this.add.text(W / 2, H / 2, "VELKOMMEN, WOLF.", {
-      fontFamily: "VT323, monospace", fontSize: "48px",
-      color: "#d4b870", letterSpacing: 4, stroke: "#1a1a1a", strokeThickness: 4,
-    }).setOrigin(0.5).setAlpha(0);
-
-    this.cameras.main.fadeIn(800);
-
-    this.tweens.add({
-      targets: intro, alpha: 1, duration: 600, delay: 600,
-    });
-    this.tweens.add({
-      targets: intro, alpha: 0, duration: 600, delay: 2400,
-    });
+    const banner = this.add.container(W / 2, H / 2);
+    const bbg = this.add.graphics();
+    bbg.fillStyle(0x1a1410, 0.95).fillRoundedRect(-260, -50, 520, 100, 6);
+    bbg.lineStyle(2, 0xd4b870).strokeRoundedRect(-260, -50, 520, 100, 6);
+    banner.add(bbg);
+    banner.add(this.add.text(0, -18, "BANANA HOLDINGS · ETASJE 23", {
+      fontFamily: "VT323, monospace", fontSize: "22px", color: "#d4b870",
+    }).setOrigin(0.5));
+    banner.add(this.add.text(0, 12, "Kenney-assets · ekte pixel art · fase 1.1", {
+      fontFamily: "VT323, monospace", fontSize: "14px", color: "#fafaf0",
+    }).setOrigin(0.5));
+    banner.setAlpha(0);
+    this.tweens.add({ targets: banner, alpha: 1, duration: 600 });
+    this.tweens.add({ targets: banner, alpha: 0, duration: 600, delay: 2400 });
 
     addSkipButton(this, () => {
       const btn = document.getElementById("skip-intro");
