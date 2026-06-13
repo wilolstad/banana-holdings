@@ -1,0 +1,39 @@
+<!doctype html>
+<html lang="no">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=no">
+<meta name="theme-color" content="#1a1410">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<title>Banana Holdings · etasje 23</title>
+<link rel="manifest" href="manifest.json">
+<link rel="apple-touch-icon" href="icons/icon-192.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=VT323&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+<div id="boot">
+  <div class="boot-inner">
+    <div class="boot-title">BANANA HOLDINGS</div>
+    <div class="boot-sub">est. 1984 · etasje 23</div>
+    <div class="boot-spinner"></div>
+    <div class="boot-status" id="boot-status">Loading Phaser…</div>
+  </div>
+</div>
+<div id="game"></div>
+<script src="https://cdn.jsdelivr.net/npm/phaser@3.80.1/dist/phaser.min.js"></script>
+<script src="js/scenes/scene-taxi.js"></script>
+<script src="js/scenes/scene-lobby.js"></script>
+<script src="js/scenes/scene-elevator.js"></script>
+<script src="js/scenes/scene-chaos.js"></script>
+<script src="js/scenes/scene-office.js"></script>
+<script src="js/main.js"></script>
+<script>
+if ("serviceWorker" in navigator) {
+  navigator.serviceWorker.register("sw.js").catch(() => {});
+}
+</script>
+</body>
+</html>
